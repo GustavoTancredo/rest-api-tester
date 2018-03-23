@@ -8,6 +8,10 @@ using Newtonsoft.Json;
 
 namespace APIClient
 {
+    /// <summary>
+    /// This program calls a RESTful API, obtains an authentication token,
+    /// sends a request to the API and prints the response to the console.
+    /// </summary>
     class Program
     {
         static void Main(string[] args)
@@ -18,16 +22,18 @@ namespace APIClient
             Console.WriteLine("authorityuri - " + ConfigurationSettings.AppSettings["authorityuri"]);
             Console.WriteLine("redirecturi - " + ConfigurationSettings.AppSettings["redirecturi"]);
 
+            string baseuri = "https://host/api/operation";
+            UriBuilder builder = new UriBuilder(baseuri);
+            builder.Query = "parameter1=value&parameter2=value";
+            Console.WriteLine("Request: " + builder.Uri);
+
             var t = GetTokenAsync();
             t.Wait();
             string token = t.Result;
 
-            //Your request to test 
-            string url = "https://host/api/operation?parameter=value";
-
             try
             {
-                var r = CallApiAsync(url, token);
+                var r = CallApiAsync(builder.Uri, token);
                 r.Wait();
                 Console.WriteLine("\n\nHTTP response status: " + r.Status);
                 Console.WriteLine(JsonConvert.SerializeObject(JsonConvert.DeserializeObject(r.Result), Formatting.Indented));
@@ -46,12 +52,12 @@ namespace APIClient
         /// <param name="url"></param>
         /// <param name="token"></param>
         /// <returns></returns>
-        static async Task<string> CallApiAsync(string url, string token)
+        static async Task<string> CallApiAsync(Uri uri, string token)
         {
             using (var client = new HttpClient())
             {
                 client.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
-                var response = await client.GetStringAsync(url);
+                var response = await client.GetStringAsync(uri);
                 return response;
             }
         }
