@@ -1,2 +1,2 @@
 # rest-api-test
-Console client to test a RESTful API with OAuth2.0
+Console client to test a RESTful API with authorization token.
